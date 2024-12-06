@@ -19,8 +19,29 @@ function App() {
       description: "This is a test product description",
       image: "https://via.placeholder.com/200",
       isLiked: false
+    },
+    {
+      id: 2,
+      title: "Another Product",
+      description: "Description for another product",
+      image: "https://via.placeholder.com/200",
+      isLiked: false
     }
   ]);
+
+  // Function to handle liking a product
+  const handleLike = (productId: number) => {
+    setProducts(products.map(product => 
+      product.id === productId 
+        ? { ...product, isLiked: !product.isLiked }
+        : product
+    ));
+  };
+
+  // Function to handle deleting a product
+  const handleDelete = (productId: number) => {
+    setProducts(products.filter(product => product.id !== productId));
+  };
 
   return (
     <div className="container">
@@ -32,10 +53,16 @@ function App() {
             <h2>{product.title}</h2>
             <p>{product.description}</p>
             <div className="card-actions">
-              <button className={`like-button ${product.isLiked ? 'liked' : ''}`}>
-                ❤️
+              <button 
+                className={`like-button ${product.isLiked ? 'liked' : ''}`}
+                onClick={() => handleLike(product.id)}
+              >
+                {product.isLiked ? '❤️' : '🤍'}
               </button>
-              <button className="delete-button">
+              <button 
+                className="delete-button"
+                onClick={() => handleDelete(product.id)}
+              >
                 🗑️
               </button>
             </div>
