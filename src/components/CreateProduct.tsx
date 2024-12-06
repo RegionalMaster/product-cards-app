@@ -2,47 +2,42 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 
-export function CreateProduct() {
+const CreateProduct = () => {
   const navigate = useNavigate()
-  const { addProduct } = useStore()
-  const [errors, setErrors] = useState<Record<string, string>>({})
-
+  const addProduct = useStore(state => state.addProduct)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    price: '',
     image: '',
-    price: ''
+    category: ''
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const validate = () => {
+  const validateForm = () => {
     const newErrors: Record<string, string> = {}
+    if (!formData.title.trim()) newErrors.title = 'Title is required'
+    if (!formData.description.trim()) newErrors.description = 'Description is required'
+    if (!formData.price) newErrors.price = 'Price is required'
+    else if (isNaN(Number(formData.price)) || Number(formData.price) <= 0) {
+      newErrors.price = 'Price must be a positive number'
+    }
+    if (!formData.image.trim()) newErrors.image = 'Image URL is required'
+    if (!formData.category.trim()) newErrors.category = 'Category is required'
     
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required'
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required'
-    }
-    if (!formData.image.trim()) {
-      newErrors.image = 'Image URL is required'
-    }
-    if (!formData.price || isNaN(Number(formData.price))) {
-      newErrors.price = 'Valid price is required'
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (validate()) {
+    if (validateForm()) {
       addProduct({
         title: formData.title,
         description: formData.description,
+        price: Number(formData.price),
         image: formData.image,
-        price: Number(formData.price)
+        category: formData.category
       })
       navigate('/')
     }
@@ -54,12 +49,19 @@ export function CreateProduct() {
       ...prev,
       [name]: value
     }))
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
   }
 
   return (
-    <div className="container">
-      <h1>Create New Product</h1>
-      <form onSubmit={handleSubmit} className="create-form">
+    <div className="create-product">
+      <h2>Create New Product</h2>
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="title">Title</label>
           <input
@@ -68,8 +70,9 @@ export function CreateProduct() {
             name="title"
             value={formData.title}
             onChange={handleChange}
+            className={errors.title ? 'error' : ''}
           />
-          {errors.title && <span className="error">{errors.title}</span>}
+          {errors.title && <span className="error-message">{errors.title}</span>}
         </div>
 
         <div className="form-group">
@@ -79,20 +82,9 @@ export function CreateProduct() {
             name="description"
             value={formData.description}
             onChange={handleChange}
+            className={errors.description ? 'error' : ''}
           />
-          {errors.description && <span className="error">{errors.description}</span>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="image">Image URL</label>
-          <input
-            type="text"
-            id="image"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-          />
-          {errors.image && <span className="error">{errors.image}</span>}
+          {errors.description && <span className="error-message">{errors.description}</span>}
         </div>
 
         <div className="form-group">
@@ -104,15 +96,48 @@ export function CreateProduct() {
             value={formData.price}
             onChange={handleChange}
             step="0.01"
+            className={errors.price ? 'error' : ''}
           />
-          {errors.price && <span className="error">{errors.price}</span>}
+          {errors.price && <span className="error-message">{errors.price}</span>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="image">Image URL</label>
+          <input
+            type="text"
+            id="image"
+            name="image"
+            value={formData.image}
+            onChange={handleChange}
+            className={errors.image ? 'error' : ''}
+          />
+          {errors.image && <span className="error-message">{errors.image}</span>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="category">Category</label>
+          <input
+            type="text"
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className={errors.category ? 'error' : ''}
+          />
+          {errors.category && <span className="error-message">{errors.category}</span>}
         </div>
 
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/')}>Cancel</button>
-          <button type="submit">Create Product</button>
+          <button type="button" onClick={() => navigate('/')} className="cancel-button">
+            Cancel
+          </button>
+          <button type="submit" className="submit-button">
+            Create Product
+          </button>
         </div>
       </form>
     </div>
   )
 }
+
+export default CreateProduct

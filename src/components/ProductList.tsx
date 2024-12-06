@@ -2,8 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import { useEffect, useMemo } from 'react'
 import type { Product } from '../store/useStore'
+import { LoadingSpinner } from './LoadingSpinner'
 
-export function ProductList() {
+const ProductList = () => {
   const navigate = useNavigate()
   const {
     products,
@@ -21,8 +22,16 @@ export function ProductList() {
     setEditingProduct
   } = useStore()
 
+  useEffect(() => {
+    console.log('ProductList mounted')
+    console.log('Current products:', products)
+    console.log('Loading state:', loading)
+    console.log('Error state:', error)
+  }, [products, loading, error])
+
   // Filter and search products
   const filteredProducts = useMemo(() => {
+    console.log('Filtering products with:', { filter, searchQuery })
     return products
       .filter(product => {
         const matchesFilter = filter === 'all' || (filter === 'liked' && product.isLiked)
@@ -37,16 +46,18 @@ export function ProductList() {
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage
     const end = start + itemsPerPage
-    return filteredProducts.slice(start, end)
+    const slicedProducts = filteredProducts.slice(start, end)
+    console.log('Paginated products:', { 
+      currentPage, 
+      totalProducts: filteredProducts.length,
+      displayedProducts: slicedProducts.length 
+    })
+    return slicedProducts
   }, [filteredProducts, currentPage, itemsPerPage])
 
-  // Categories for filtering
-  const categories = useMemo(() => {
-    return Array.from(new Set(products.map(p => p.category))).filter(Boolean)
-  }, [products])
-
-  if (loading) return <div className="loading">Loading products...</div>
+  if (loading) return <LoadingSpinner />
   if (error) return <div className="error">{error}</div>
+  if (products.length === 0) return <div className="no-products">No products found</div>
 
   return (
     <div className="container">
@@ -76,43 +87,47 @@ export function ProductList() {
         </div>
       </div>
 
-      <div className="product-grid">
-        {paginatedProducts.map(product => (
-          <div key={product.id} className="product-card">
-            <img
-              src={product.image}
-              alt={product.title}
-              onClick={() => navigate(`/products/${product.id}`)}
-            />
-            <h2>{product.title}</h2>
-            <p>{product.description}</p>
-            <p className="price">${product.price}</p>
-            <div className="card-actions">
-              <button
-                className={`like-button ${product.isLiked ? 'liked' : ''}`}
-                onClick={() => toggleLike(product.id)}
-              >
-                {product.isLiked ? '❤️' : '🤍'}
-              </button>
-              <button
-                className="edit-button"
-                onClick={() => {
-                  setEditingProduct(product)
-                  navigate(`/edit-product/${product.id}`)
-                }}
-              >
-                ✏️
-              </button>
-              <button
-                className="delete-button"
-                onClick={() => deleteProduct(product.id)}
-              >
-                🗑️
-              </button>
+      {paginatedProducts.length === 0 ? (
+        <div className="no-results">No products match your search criteria</div>
+      ) : (
+        <div className="product-grid">
+          {paginatedProducts.map(product => (
+            <div key={product.id} className="product-card">
+              <img
+                src={product.image}
+                alt={product.title}
+                onClick={() => navigate(`/products/${product.id}`)}
+              />
+              <h2>{product.title}</h2>
+              <p>{product.description}</p>
+              <p className="price">${product.price}</p>
+              <div className="card-actions">
+                <button
+                  className={`like-button ${product.isLiked ? 'liked' : ''}`}
+                  onClick={() => toggleLike(product.id)}
+                >
+                  {product.isLiked ? '❤️' : '🤍'}
+                </button>
+                <button
+                  className="edit-button"
+                  onClick={() => {
+                    setEditingProduct(product)
+                    navigate(`/edit-product/${product.id}`)
+                  }}
+                >
+                  ✏️
+                </button>
+                <button
+                  className="delete-button"
+                  onClick={() => deleteProduct(product.id)}
+                >
+                  🗑️
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="pagination">
@@ -142,3 +157,5 @@ export function ProductList() {
     </div>
   )
 }
+
+export default ProductList

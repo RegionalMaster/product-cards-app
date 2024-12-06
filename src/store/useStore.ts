@@ -42,15 +42,19 @@ export const useStore = create<ProductStore>((set, get) => ({
   editingProduct: null,
 
   fetchProducts: async () => {
+    console.log('Fetching products...')
     set({ loading: true, error: null })
     try {
       const response = await axios.get('https://fakestoreapi.com/products')
+      console.log('Fetched data:', response.data)
       const products = response.data.map((product: any) => ({
         ...product,
         isLiked: false
       }))
       set({ products, loading: false })
+      console.log('Updated store with products:', products)
     } catch (error) {
+      console.error('Error fetching products:', error)
       set({ error: 'Failed to fetch products', loading: false })
     }
   },
@@ -70,11 +74,11 @@ export const useStore = create<ProductStore>((set, get) => ({
   },
 
   setFilter: (filter) => {
-    set({ filter, currentPage: 1 }) // Reset to first page when filtering
+    set({ filter, currentPage: 1 })
   },
 
   setSearchQuery: (query) => {
-    set({ searchQuery: query, currentPage: 1 }) // Reset to first page when searching
+    set({ searchQuery: query, currentPage: 1 })
   },
 
   setCurrentPage: (page) => {

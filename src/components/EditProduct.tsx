@@ -1,19 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store/useStore'
 import type { Product } from '../store/useStore'
 
-export function EditProduct() {
+const EditProduct = () => {
   const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const { products, updateProduct } = useStore()
+  const { id } = useParams()
+  const updateProduct = useStore(state => state.updateProduct)
+  const products = useStore(state => state.products)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [formData, setFormData] = useState<Omit<Product, 'id' | 'isLiked'>>({
     title: '',
     description: '',
-    image: '',
     price: 0,
+    image: '',
     category: ''
   })
 
@@ -23,41 +24,32 @@ export function EditProduct() {
       setFormData({
         title: product.title,
         description: product.description,
-        image: product.image,
         price: product.price,
+        image: product.image,
         category: product.category || ''
       })
     }
   }, [id, products])
 
-  const validate = () => {
+  const validateForm = () => {
     const newErrors: Record<string, string> = {}
+    if (!formData.title.trim()) newErrors.title = 'Title is required'
+    if (!formData.description.trim()) newErrors.description = 'Description is required'
+    if (!formData.price || formData.price <= 0) newErrors.price = 'Valid price is required'
+    if (!formData.image.trim()) newErrors.image = 'Image URL is required'
+    if (!formData.category.trim()) newErrors.category = 'Category is required'
     
-    if (!formData.title.trim()) {
-      newErrors.title = 'Title is required'
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required'
-    }
-    if (!formData.image.trim()) {
-      newErrors.image = 'Image URL is required'
-    }
-    if (!formData.price || formData.price <= 0) {
-      newErrors.price = 'Valid price is required'
-    }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (validate()) {
+    if (validateForm()) {
       updateProduct({
-        ...formData,
         id: Number(id),
-        isLiked: products.find(p => p.id === Number(id))?.isLiked || false
+        ...formData,
+        isLiked: false
       })
       navigate('/')
     }
@@ -69,12 +61,19 @@ export function EditProduct() {
       ...prev,
       [name]: name === 'price' ? Number(value) : value
     }))
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }))
+    }
   }
 
   return (
-    <div className="container">
-      <h1>Edit Product</h1>
-      <form onSubmit={handleSubmit} className="create-form">
+    <div className="edit-product">
+      <h2>Edit Product</h2>
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="title">Title</label>
           <input
@@ -83,8 +82,9 @@ export function EditProduct() {
             name="title"
             value={formData.title}
             onChange={handleChange}
+            className={errors.title ? 'error' : ''}
           />
-          {errors.title && <span className="error">{errors.title}</span>}
+          {errors.title && <span className="error-message">{errors.title}</span>}
         </div>
 
         <div className="form-group">
@@ -94,20 +94,9 @@ export function EditProduct() {
             name="description"
             value={formData.description}
             onChange={handleChange}
+            className={errors.description ? 'error' : ''}
           />
-          {errors.description && <span className="error">{errors.description}</span>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="image">Image URL</label>
-          <input
-            type="text"
-            id="image"
-            name="image"
-            value={formData.image}
-            onChange={handleChange}
-          />
-          {errors.image && <span className="error">{errors.image}</span>}
+          {errors.description && <span className="error-message">{errors.description}</span>}
         </div>
 
         <div className="form-group">
@@ -119,8 +108,22 @@ export function EditProduct() {
             value={formData.price}
             onChange={handleChange}
             step="0.01"
+            className={errors.price ? 'error' : ''}
           />
-          {errors.price && <span className="error">{errors.price}</span>}
+          {errors.price && <span className="error-message">{errors.price}</span>}
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="image">Image URL</label>
+          <input
+            type="text"
+            id="image"
+            name="image"
+            value={formData.image}
+            onChange={handleChange}
+            className={errors.image ? 'error' : ''}
+          />
+          {errors.image && <span className="error-message">{errors.image}</span>}
         </div>
 
         <div className="form-group">
@@ -131,14 +134,22 @@ export function EditProduct() {
             name="category"
             value={formData.category}
             onChange={handleChange}
+            className={errors.category ? 'error' : ''}
           />
+          {errors.category && <span className="error-message">{errors.category}</span>}
         </div>
 
         <div className="form-actions">
-          <button type="button" onClick={() => navigate('/')}>Cancel</button>
-          <button type="submit">Update Product</button>
+          <button type="button" onClick={() => navigate('/')} className="cancel-button">
+            Cancel
+          </button>
+          <button type="submit" className="submit-button">
+            Save Changes
+          </button>
         </div>
       </form>
     </div>
   )
 }
+
+export default EditProduct
