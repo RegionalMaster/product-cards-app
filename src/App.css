@@ -267,3 +267,107 @@ h1 {
   color: #333;
   margin-bottom: 2rem;
 }
+
+.controls {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-bar {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination button.active {
+  background: #007bff;
+  color: white;
+  border-color: #0056b3;
+}
+
+.pagination button:not(:disabled):hover {
+  background: #f0f0f0;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 2rem;
+  color: #dc3545;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.edit-button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.edit-button:hover {
+  background-color: #e3f2fd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .controls {
+    padding: 0 1rem;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .pagination {
+    flex-wrap: wrap;
+  }
+}

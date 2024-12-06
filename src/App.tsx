@@ -4,6 +4,7 @@ import { useStore } from './store/useStore'
 import { ProductList } from './components/ProductList'
 import { ProductDetail } from './components/ProductDetail'
 import { CreateProduct } from './components/CreateProduct'
+import { EditProduct } from './components/EditProduct'
 import './App.css'
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route path="/" element={<ProductList />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/create-product" element={<CreateProduct />} />
+        <Route path="/edit-product/:id" element={<EditProduct />} />
       </Routes>
     </BrowserRouter>
   )
